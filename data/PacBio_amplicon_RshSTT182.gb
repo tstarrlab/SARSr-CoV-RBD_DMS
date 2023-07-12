@@ -1,0 +1,69 @@
+LOCUS       RshSTT182        1064 bp    DNA        linear       21-SEP-2021
+DEFINITION  PacBio amplicon for deep mutational scanning of  RshSTT182
+ACCESSION   None
+SOURCE      Tyler Starr
+  ORGANISM  .
+COMMENT     PacBio amplicon for RshSTT182 RBD libraries.
+COMMENT     
+COMMENT     ApEinfo:methylated:1
+FEATURES             Location/Qualifiers
+     termini5        1..33
+                     /locus_tag="termini5"
+                     /label="termini5"
+                     /ApEinfo_label="termini5"
+                     /ApEinfo_fwdcolor="#fefb00"
+                     /ApEinfo_revcolor="green"
+                     /ApEinfo_graphicformat="arrow_data {{0 1 2 0 0 -1} {} 0}
+                     width 5 offset 0"
+     spacer          622..1042
+                     /locus_tag="spacer"
+                     /label="spacer"
+                     /ApEinfo_label="spacer"
+                     /ApEinfo_fwdcolor="#fefb00"
+                     /ApEinfo_revcolor="green"
+                     /ApEinfo_graphicformat="arrow_data {{0 1 2 0 0 -1} {} 0}
+                     width 5 offset 0"
+     barcode         1043..1058
+                     /locus_tag="barcode"
+                     /label="barcode"
+                     /ApEinfo_label="barcode"
+                     /ApEinfo_fwdcolor="#00f900"
+                     /ApEinfo_revcolor="green"
+                     /ApEinfo_graphicformat="arrow_data {{0 1 2 0 0 -1} {} 0}
+                     width 5 offset 0"
+     termini3        1059..1064
+                     /locus_tag="termini3"
+                     /label="termini3"
+                     /ApEinfo_label="termini3"
+                     /ApEinfo_fwdcolor="#fefb00"
+                     /ApEinfo_revcolor="green"
+                     /ApEinfo_graphicformat="arrow_data {{0 1 2 0 0 -1} {} 0}
+                     width 5 offset 0"
+     gene            34..621
+                     /locus_tag="gene"
+                     /label="gene"
+                     /ApEinfo_label="gene"
+                     /ApEinfo_fwdcolor="#ff797d"
+                     /ApEinfo_revcolor="#ff102f"
+                     /ApEinfo_graphicformat="arrow_data {{0 0.5 0 1 2 0 0 -1 0
+                     -0.5} {} 0} width 5 offset 0"
+ORIGIN
+        1 ggccgcggag gcggagggtc ggctagccat atgAATATCA CAAATCTGTG CCCATTCGGA
+       61 GAGGTTTTCA ATGCGACCAC TTTTGCTAGC GTGTATGCTT GGAATAGGCG TAGGATTTCA
+      121 AATTGTGTGG CTGATTACAG CGTCTTGTAT AATACGACTT CCTTCAGCAC TTTTAAATGT
+      181 TACGGCGTCA GTCCCACAAA ACTTAACGAC CTGTGTTTCA CAAATGTTTA TGCGGACTCA
+      241 TTCGTGGTTC GTGGCGACGA AGTGAGACAG ATAGCCCCAG GGCAGACCGG GAAAATAGCT
+      301 GACTATAATT ATAAATTACC AGACGATTTC ATGGGATGCG TTATAGCGTG GAACTCAATC
+      361 TCTTTAGACG CAGGAGGAAG CTACTACTAC AGGTTATTTA GGAAGAGTGT ACTTAAACCA
+      421 TTCGAGAGGG ACATTTCTAC GCAGCTATAC CAAGCTGGGG ACAAACCTTG CAGCGTGGAA
+      481 GGACCAGACT GCTATTATCC GTTGCAGAGT TATTACTTTC AAAGCACAAA CGGGGTCGGA
+      541 TACCAACCTT ATAGGGTTGT CGTACTATCA TTTGAGCTGT TAAACGCCCC GGCGACAGTA
+      601 TGTGGGCCTA AGAAGTCAAC Gctcgagggg ggcggttccg aacaaaagct tatttctgaa
+      661 gaggacttgt aatagagatc tgataacaac agtgtagatg taacaaaatc gactttgttc
+      721 ccactgtact tttagctcgt acaaaataca atatactttt catttctccg taaacaacat
+      781 gttttcccat gtaatatcct tttctatttt tcgttccgtt accaacttta cacatacttt
+      841 atatagctat tcacttctat acactaaaaa actaagacaa ttttaatttt gctgcctgcc
+      901 atatttcaat ttgttataaa ttcctataat ttatcctatt agtagctaaa aaaagatgaa
+      961 tgtgaatcga atcctaagag aattaatgat acggcgacca ccgagatcta cactctttcc
+     1021 ctacacgacg ctcttccgat ctNNNNNNNN NNNNNNNNgc ggcc 
+//

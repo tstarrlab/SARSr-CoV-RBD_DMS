@@ -1,0 +1,12 @@
+library,run,input_file,fastq_prebuilt
+lib40,210917,/fh/fast/bloom_j/SR/ngs/pacbio/210917_SequelIIe/Starr_Pool-Cell2/demultiplexing_files/demultiplex.bc1009_BAK8A_OA--bc1009_BAK8A_OA.bam,no
+lib41,210917,/fh/fast/bloom_j/SR/ngs/pacbio/210917_SequelIIe/Starr_Pool-Cell2/demultiplexing_files/demultiplex.bc1010_BAK8A_OA--bc1010_BAK8A_OA.bam,no
+lib40,211118_A,/fh/fast/bloom_j/SR/ngs/pacbio/211118_TylerStarr/211108_pool_Starr-Cell1/demultiplex.bc1003_BAK8A_OA--bc1003_BAK8A_OA.hifi_reads.fastq.gz,yes
+lib40,211118_B,/fh/fast/bloom_j/SR/ngs/pacbio/211118_TylerStarr/211108_pool_Starr-Cell2/demultiplex.bc1003_BAK8A_OA--bc1003_BAK8A_OA.hifi_reads.fastq.gz,yes
+lib40,211118_C,/fh/fast/bloom_j/SR/ngs/pacbio/211118_TylerStarr/211108_pool_Starr-Cell1/demultiplex.bc1008_BAK8A_OA--bc1008_BAK8A_OA.hifi_reads.fastq.gz,yes
+lib40,211118_D,/fh/fast/bloom_j/SR/ngs/pacbio/211118_TylerStarr/211108_pool_Starr-Cell2/demultiplex.bc1008_BAK8A_OA--bc1008_BAK8A_OA.hifi_reads.fastq.gz,yes
+lib46,200916_1,/fh/fast/bloom_j/computational_notebooks/tstarr/2020/SARSr-CoV_homolog_survey/results/ccs/lib1_200916_1_ccs.fastq.gz,yes
+lib46,200916_2,/fh/fast/bloom_j/computational_notebooks/tstarr/2020/SARSr-CoV_homolog_survey/results/ccs/lib1_200916_2_ccs.fastq.gz,yes
+lib46,201110,/fh/fast/bloom_j/computational_notebooks/tstarr/2020/SARSr-CoV_homolog_survey/results/ccs/lib1_201110_ccs.fastq.gz,yes
+lib46,211108_1,/fh/fast/bloom_j/SR/ngs/pacbio/211118_TylerStarr/211108_pool_Starr-Cell1/demultiplex.bc1009_BAK8A_OA--bc1009_BAK8A_OA.hifi_reads.fastq.gz,yes
+lib46,211108_2,/fh/fast/bloom_j/SR/ngs/pacbio/211118_TylerStarr/211108_pool_Starr-Cell2/demultiplex.bc1009_BAK8A_OA--bc1009_BAK8A_OA.hifi_reads.fastq.gz,yes

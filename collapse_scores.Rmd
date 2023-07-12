@@ -1,0 +1,562 @@
+---
+title: "Collapse barcodes to final per-RBD/mutant phenotype scores"
+author: "Tyler Starr"
+date: "10/03/2021"
+output:
+  github_document:
+    toc: true
+    html_preview: false
+editor_options: 
+  chunk_output_type: inline
+---
+This notebook reads in the per-barcode titration Kds and expression measurements from the `compute_binding_Kd` and `compute_expression_meanF` scripts. It synthesizes these two sets of results and calculates the final 'mean' phenotypes for each variant, and generates some coverage and QC analyses.
+
+```{r setup, message=FALSE, warning=FALSE, error=FALSE}
+require("knitr")
+knitr::opts_chunk$set(echo = T)
+knitr::opts_chunk$set(dev.args = list(png = list(type = "cairo")))
+
+#list of packages to install/load
+packages = c("yaml","data.table","tidyverse","gridExtra")
+#install any packages not already installed
+installed_packages <- packages %in% rownames(installed.packages())
+if(any(installed_packages == F)){
+  install.packages(packages[!installed_packages])
+}
+#load packages
+invisible(lapply(packages, library, character.only=T))
+
+#read in config file
+config <- read_yaml("config.yaml")
+
+#make output directory
+if(!file.exists(config$final_variant_scores_dir)){
+  dir.create(file.path(config$final_variant_scores_dir))
+}
+
+#read in file giving spike/RBD indexing concordance between backgrounds
+RBD_sites <- read.csv(file=config$RBD_sites,stringsAsFactors=F)
+```
+Session info for reproducing environment:
+```{r print_sessionInfo}
+sessionInfo()
+```
+
+## Setup
+
+Read in tables of per-barcode expression and binding Kd measurements and combine.
+
+```{r input_data}
+dt_bind_huACE2 <- data.table(read.csv(config$Titeseq_huACE2_Kds_file),stringsAsFactors=F)
+dt_bind_RshACE2 <- data.table(read.csv(config$Titeseq_RshACE2_Kds_file),stringsAsFactors=F)
+dt_expr <- data.table(read.csv(config$expression_sortseq_file),stringsAsFactors=F)
+
+dt <- merge(merge(dt_bind_huACE2,dt_bind_RshACE2,all=TRUE),dt_expr,all=TRUE)
+```
+
+## Calculate per-variant mean scores within replicates
+
+Calculate the mean binding and expression score collapsed by genotype. Also output the number of barcodes across which a variant score was determined in each library.
+
+```{r calculate_mean_scores}
+dt[is.na(log10Ka_huACE2),TiteSeq_huACE2_avgcount:=NA]
+dt[is.na(log10Ka_RshACE2),TiteSeq_RshACE2_avgcount:=NA]
+dt[is.na(expression),expr_count:=NA]
+
+dt[,mean_bind_huACE2:=mean(log10Ka_huACE2,na.rm=T),by=c("library","target","variant_class","aa_substitutions")]
+dt[,sd_bind_huACE2:=sd(log10Ka_huACE2,na.rm=T),by=c("library","target","variant_class","aa_substitutions")]
+dt[,n_bc_bind_huACE2:=sum(!is.na(log10Ka_huACE2)),by=c("library","target","variant_class","aa_substitutions")]
+dt[,avg_count_bind_huACE2:=mean(TiteSeq_huACE2_avgcount,na.rm=T),by=c("library","target","variant_class","aa_substitutions")]
+
+dt[,mean_bind_RshACE2:=mean(log10Ka_RshACE2,na.rm=T),by=c("library","target","variant_class","aa_substitutions")]
+dt[,sd_bind_RshACE2:=sd(log10Ka_RshACE2,na.rm=T),by=c("library","target","variant_class","aa_substitutions")]
+dt[,n_bc_bind_RshACE2:=sum(!is.na(log10Ka_RshACE2)),by=c("library","target","variant_class","aa_substitutions")]
+dt[,avg_count_bind_RshACE2:=mean(TiteSeq_RshACE2_avgcount,na.rm=T),by=c("library","target","variant_class","aa_substitutions")]
+
+dt[,mean_expr:=mean(expression,na.rm=T),by=c("library","target","variant_class","aa_substitutions")]
+dt[,sd_expr:=sd(expression,na.rm=T),by=c("library","target","variant_class","aa_substitutions")]
+dt[,n_bc_expr:=sum(!is.na(expression)),by=c("library","target","variant_class","aa_substitutions")]
+dt[,avg_count_expr:=mean(expr_count,na.rm=T),by=c("library","target","variant_class","aa_substitutions")]
+
+dt <- unique(dt[,.(library,target,variant_class,aa_substitutions,n_aa_substitutions,mean_bind_huACE2,sd_bind_huACE2,n_bc_bind_huACE2,avg_count_bind_huACE2,mean_bind_RshACE2,sd_bind_RshACE2,n_bc_bind_RshACE2,avg_count_bind_RshACE2,mean_expr,sd_expr,n_bc_expr,avg_count_expr)])
+```
+
+Some QC plots. First, look at distribution of number barcodes for binding and expression measurements for single mutant detemrinations. These are 'left-justified' histograms, so the leftmost bar represents the number of genotypes for which no barcodes were collapsed to final measurement in a pool.
+
+```{r hist_n_bc_per_mutant, fig.width=6, fig.height=9, fig.align="center", dpi=300,dev="png"}
+par(mfrow=c(3,2))
+hist(dt[library=="pool1" & variant_class=="1 nonsynonymous",n_bc_bind_huACE2],main="pool1, bind_huACE2",right=F,breaks=max(dt[library=="pool1" & variant_class=="1 nonsynonymous",n_bc_bind_huACE2],na.rm=T),xlab="")
+hist(dt[library=="pool2" & variant_class=="1 nonsynonymous",n_bc_bind_huACE2],main="pool2, bind_huACE2",right=F,breaks=max(dt[library=="pool2" & variant_class=="1 nonsynonymous",n_bc_bind_huACE2],na.rm=T),xlab="")
+hist(dt[library=="pool1" & variant_class=="1 nonsynonymous",n_bc_bind_RshACE2],main="pool1, bind_RshACE2",right=F,breaks=max(dt[library=="pool1" & variant_class=="1 nonsynonymous",n_bc_bind_RshACE2],na.rm=T),xlab="")
+plot.new()
+hist(dt[library=="pool1" & variant_class=="1 nonsynonymous",n_bc_expr],main="pool1, expr",right=F,breaks=max(dt[library=="pool1" & variant_class=="1 nonsynonymous",n_bc_expr],na.rm=T),xlab="number barcodes collapsed")
+hist(dt[library=="pool2" & variant_class=="1 nonsynonymous",n_bc_expr],main="pool2, expr",right=F,breaks=max(dt[library=="pool2" & variant_class=="1 nonsynonymous",n_bc_expr],na.rm=T),xlab="number barcodes collapsed")
+
+invisible(dev.print(pdf, paste(config$final_variant_scores_dir,"/histogram_n_bc_per_geno_sep-libs.pdf",sep=""),useDingbats=F))
+
+```
+
+What about how SEM tracks with number of barcodes collapsed? This could help for choosing a minimum number of barcodes to use.
+
+```{r sem_v_n-bc, fig.width=8, fig.height=12, fig.align="center", dpi=300,dev="png"}
+par(mfrow=c(3,2))
+plot(dt[library=="pool1" & variant_class=="1 nonsynonymous",n_bc_bind_huACE2],
+     dt[library=="pool1" & variant_class=="1 nonsynonymous",sd_bind_huACE2/sqrt(n_bc_bind_huACE2)],
+     pch=19,col="#00000005",main="pool1, bind_huACE2",ylab="SEM",xlab="number barcodes collapsed")
+plot(dt[library=="pool2" & variant_class=="1 nonsynonymous",n_bc_bind_huACE2],
+     dt[library=="pool2" & variant_class=="1 nonsynonymous",sd_bind_huACE2/sqrt(n_bc_bind_huACE2)],
+     pch=19,col="#00000005",main="pool2, bind",ylab="SEM",xlab="number barcodes collapsed")
+plot(dt[library=="pool1" & variant_class=="1 nonsynonymous",n_bc_bind_RshACE2],
+     dt[library=="pool1" & variant_class=="1 nonsynonymous",sd_bind_RshACE2/sqrt(n_bc_bind_RshACE2)],
+     pch=19,col="#00000005",main="pool1, bind_RshACE2",ylab="SEM",xlab="number barcodes collapsed")
+plot.new()
+plot(dt[library=="pool1" & variant_class=="1 nonsynonymous",n_bc_expr],
+     dt[library=="pool1" & variant_class=="1 nonsynonymous",sd_expr/sqrt(n_bc_expr)],
+     pch=19,col="#00000005",main="pool1, expr",ylab="SEM",xlab="number barcodes collapsed")
+plot(dt[library=="pool2" & variant_class=="1 nonsynonymous",n_bc_expr],
+     dt[library=="pool2" & variant_class=="1 nonsynonymous",sd_expr/sqrt(n_bc_expr)],
+     pch=19,col="#00000005",main="pool2, expr",ylab="SEM",xlab="number barcodes collapsed")
+
+invisible(dev.print(pdf, paste(config$final_variant_scores_dir,"/sem_v_n-bc.pdf",sep=""),useDingbats=F))
+```
+
+
+Format into a 'mutation lookup table', where we focus just on the single mutants (and wildtype), breakup the string of mutations, and fill in the table to also include any missing mutants.
+
+```{r format_mutant_table}
+dt_mutant <- dt[variant_class %in% "1 nonsynonymous",]
+
+#split mutation string
+#define function to apply
+split_mut <- function(x){
+  split <- strsplit(x,split="")[[1]]
+  return(list(split[1],as.numeric(paste(split[2:(length(split)-1)],collapse="")),split[length(split)]))
+}
+dt_mutant[,c("wildtype","position","mutant"):=split_mut(as.character(aa_substitutions)),by=aa_substitutions]
+
+dt_mutant <- dt_mutant[,.(library,target,wildtype,position,mutant,
+                          mean_bind_huACE2,sd_bind_huACE2,n_bc_bind_huACE2,avg_count_bind_huACE2,
+                          mean_bind_RshACE2,sd_bind_RshACE2,n_bc_bind_RshACE2,avg_count_bind_RshACE2,
+                          mean_expr,sd_expr,n_bc_expr,avg_count_expr)]
+
+aas <- c("A","C","D","E","F","G","H","I","K","L","M","N","P","Q","R","S","T","V","W","Y")
+#fill out missing values in table with a hideous loop, so the table is complete for all mutaitons (including those that are missing). If you are somebody who is reading this code, I apologize.
+for(lib in c("pool1","pool2")){
+  for(bg in as.character(unique(dt_mutant$target))){
+    for(pos in 1:max(dt_mutant$position)){
+      for(aa in aas){
+        if(!(aa %in% as.character(dt_mutant[library==lib & target==bg & position==pos,mutant]))){
+          dt_mutant <- rbind(dt_mutant,list(lib, bg, dt_mutant[library==lib & target==bg & position==pos,wildtype][1],pos,aa),fill=T)
+        }
+      }
+    }
+  }
+}
+setkey(dt_mutant,library,target,position,mutant)
+
+#fill in wildtype values -- should vectorize in data table but being so stupid so just going to write for loop
+for(bg in c("Wuhan_Hu_1","RshSTT182","PRD0038","SARS1","RsYN04","RmYN02")){
+  for(lib in c("pool1","pool2")){
+    dt_mutant[library==lib & target==bg & wildtype==mutant, 
+              c("mean_bind_huACE2","sd_bind_huACE2","n_bc_bind_huACE2","avg_count_bind_huACE2",
+                "mean_bind_RshACE2","sd_bind_RshACE2","n_bc_bind_RshACE2","avg_count_bind_RshACE2",
+                "mean_expr","sd_expr","n_bc_expr","avg_count_expr") := 
+                dt[library==lib & target==bg & variant_class=="wildtype",
+                   .(mean_bind_huACE2,sd_bind_huACE2,n_bc_bind_huACE2,avg_count_bind_huACE2,
+                     mean_bind_RshACE2,sd_bind_RshACE2,n_bc_bind_RshACE2,avg_count_bind_RshACE2,
+                     mean_expr,sd_expr,n_bc_expr,avg_count_expr)]]
+  }
+}
+
+#add delta bind and expr measures
+for(bg in c("Wuhan_Hu_1","RshSTT182","PRD0038","SARS1","RsYN04","RmYN02")){
+  for(lib in c("pool1","pool2")){
+    ref_bind_huACE2 <- dt[library==lib & target==bg & variant_class=="wildtype",mean_bind_huACE2]
+    ref_bind_RshACE2 <- dt[library==lib & target==bg & variant_class=="wildtype",mean_bind_RshACE2]
+    ref_expr <- dt[library==lib & target==bg & variant_class=="wildtype",mean_expr]
+    dt_mutant[library==lib & target==bg,delta_bind_huACE2 := mean_bind_huACE2 - ref_bind_huACE2]
+    dt_mutant[library==lib & target==bg,delta_bind_RshACE2 := mean_bind_RshACE2 - ref_bind_RshACE2]
+    dt_mutant[library==lib & target==bg,delta_expr := mean_expr - ref_expr]
+  }
+}
+```
+
+We have duplicates for each measurement. Let's look at correlations! Later on, can look at how correlation degrades when subsetting on lower and lower n_bcs, and use that to determine if I need to filter for a minimum number of collapsed bcs
+
+```{r plot_correlations_expr, echo=T, fig.width=5, fig.height=5, fig.align="center", dpi=300,dev="png"}
+x <- dt_mutant[library=="pool1" & wildtype!=mutant,mean_expr]; y <- dt_mutant[library=="pool2" & wildtype!=mutant,mean_expr]; plot(x,y,pch=19,col="#00000020",xlab="replicate 1",ylab="replicate 2",main="expression");model <- lm(y~x);abline(model,lty=2,col="red");legend("topleft",legend=paste("R2: ",round(summary(model)$r.squared,3),sep=""),bty="n")
+
+invisible(dev.print(pdf, paste(config$final_variant_scores_dir,"/replicate_correlations_expr.pdf",sep=""),useDingbats=F))
+```
+
+```{r plot_correlations_bind_huACE2, echo=T, fig.width=8, fig.height=12, fig.align="center", dpi=300,dev="png"}
+par(mfrow=c(3,2))
+x <- dt_mutant[target=="Wuhan_Hu_1" & library=="pool1" & wildtype!=mutant,mean_bind_huACE2]; y <- dt_mutant[target=="Wuhan_Hu_1" & library=="pool2" & wildtype!=mutant,mean_bind_huACE2]; plot(x,y,pch=19,col="#00000020",xlab="replicate 1",ylab="replicate 2",main="huACE2 binding affinity, SARS2",xlim=range(dt_mutant[library=="pool1",mean_bind_huACE2],na.rm=T),ylim=range(dt_mutant[library=="pool2",mean_bind_huACE2],na.rm=T));model <- lm(y~x);abline(model,lty=2,col="red");legend("topleft",legend=paste("R2: ",round(summary(model)$r.squared,3),sep=""),bty="n")
+
+x <- dt_mutant[target=="RshSTT182" & library=="pool1" & wildtype!=mutant,mean_bind_huACE2]; y <- dt_mutant[target=="RshSTT182" & library=="pool2" & wildtype!=mutant,mean_bind_huACE2]; plot(x,y,pch=19,col="#00000020",xlab="replicate 1",ylab="replicate 2",main="huACE2 binding affinity, RshSTT182",xlim=range(dt_mutant[library=="pool1",mean_bind_huACE2],na.rm=T),ylim=range(dt_mutant[library=="pool2",mean_bind_huACE2],na.rm=T));model <- lm(y~x);abline(model,lty=2,col="red");legend("topleft",legend=paste("R2: ",round(summary(model)$r.squared,3),sep=""),bty="n")
+
+x <- dt_mutant[target=="SARS1" & library=="pool1" & wildtype!=mutant,mean_bind_huACE2]; y <- dt_mutant[target=="SARS1" & library=="pool2" & wildtype!=mutant,mean_bind_huACE2]; plot(x,y,pch=19,col="#00000020",xlab="replicate 1",ylab="replicate 2",main="huACE2 binding affinity, SARS1",xlim=range(dt_mutant[library=="pool1",mean_bind_huACE2],na.rm=T),ylim=range(dt_mutant[library=="pool2",mean_bind_huACE2],na.rm=T));model <- lm(y~x);abline(model,lty=2,col="red");legend("topleft",legend=paste("R2: ",round(summary(model)$r.squared,3),sep=""),bty="n")
+
+x <- dt_mutant[target=="PRD0038" & library=="pool1" & wildtype!=mutant,mean_bind_huACE2]; y <- dt_mutant[target=="PRD0038" & library=="pool2" & wildtype!=mutant,mean_bind_huACE2]; plot(x,y,pch=19,col="#00000020",xlab="replicate 1",ylab="replicate 2",main="huACE2 binding affinity, PRD0038",xlim=range(dt_mutant[library=="pool1",mean_bind_huACE2],na.rm=T),ylim=range(dt_mutant[library=="pool2",mean_bind_huACE2],na.rm=T));model <- lm(y~x);abline(model,lty=2,col="red");legend("topleft",legend=paste("R2: ",round(summary(model)$r.squared,3),sep=""),bty="n")
+
+x <- dt_mutant[target=="RsYN04" & library=="pool1" & wildtype!=mutant,mean_bind_huACE2]; y <- dt_mutant[target=="RsYN04" & library=="pool2" & wildtype!=mutant,mean_bind_huACE2]; plot(x,y,pch=19,col="#00000020",xlab="replicate 1",ylab="replicate 2",main="huACE2 binding affinity, RsYN04",xlim=range(dt_mutant[library=="pool1",mean_bind_huACE2],na.rm=T),ylim=range(dt_mutant[library=="pool2",mean_bind_huACE2],na.rm=T));model <- lm(y~x);abline(model,lty=2,col="red");legend("topleft",legend=paste("R2: ",round(summary(model)$r.squared,3),sep=""),bty="n")
+
+x <- dt_mutant[target=="RmYN02" & library=="pool1" & wildtype!=mutant,mean_bind_huACE2]; y <- dt_mutant[target=="RmYN02" & library=="pool2" & wildtype!=mutant,mean_bind_huACE2]; plot(x,y,pch=19,col="#00000020",xlab="replicate 1",ylab="replicate 2",main="huACE2 binding affinity, RmYN02",xlim=range(dt_mutant[library=="pool1",mean_bind_huACE2],na.rm=T),ylim=range(dt_mutant[library=="pool2",mean_bind_huACE2],na.rm=T));model <- lm(y~x);abline(model,lty=2,col="red");legend("topleft",legend=paste("R2: ",round(summary(model)$r.squared,3),sep=""),bty="n")
+
+
+invisible(dev.print(pdf, paste(config$final_variant_scores_dir,"/replicate_correlations_bind_huACE2.pdf",sep=""),useDingbats=F))
+```
+
+## Calculate per-mutant score across libraries
+
+Collapse down to mean from both replicates, and total n barcodes between the two replicates. Also record the number of the replicates the variant was quantified within. Note, we are currently keeping a value even if it's determined from a single bc fit in a single pool. Later on, we may want to require some combination of minimum number of bcs within or between libraries for retention.
+
+```{r final_means}
+dt_final <- copy(dt_mutant)
+
+dt_final[ ,bind_huACE2_tot:=mean(mean_bind_huACE2,na.rm=T),by=c("target","position","mutant")]
+dt_final[ ,delta_bind_huACE2_tot:=mean(delta_bind_huACE2,na.rm=T),by=c("target","position","mutant")]
+dt_final[ ,n_bc_bind_huACE2_tot:=sum(n_bc_bind_huACE2,na.rm=T),by=c("target","position","mutant")]
+dt_final[ ,n_libs_bind_huACE2_tot:=sum(!is.na(mean_bind_huACE2)),by=c("target","position","mutant")]
+
+dt_final[ ,bind_RshACE2_tot:=mean(mean_bind_RshACE2,na.rm=T),by=c("target","position","mutant")]
+dt_final[ ,delta_bind_RshACE2_tot:=mean(delta_bind_RshACE2,na.rm=T),by=c("target","position","mutant")]
+dt_final[ ,n_bc_bind_RshACE2_tot:=sum(n_bc_bind_RshACE2,na.rm=T),by=c("target","position","mutant")]
+dt_final[ ,n_libs_bind_RshACE2_tot:=sum(!is.na(mean_bind_RshACE2)),by=c("target","position","mutant")]
+
+dt_final[ ,expr_tot:=mean(mean_expr,na.rm=T),by=c("target","position","mutant")]
+dt_final[ ,delta_expr_tot:=mean(delta_expr,na.rm=T),by=c("target","position","mutant")]
+dt_final[ ,n_bc_expr_tot:=sum(n_bc_expr,na.rm=T),by=c("target","position","mutant")]
+dt_final[ ,n_libs_expr_tot:=sum(!is.na(mean_expr)),by=c("target","position","mutant")]
+
+#reindex sites for each background according to alignment. I will keep two columns: one gives each mutation in the "SARS2" spike indexing, one that gives that spike's indexing
+
+#remove positions past the last index (no wildtype position). Could also fix this above when we fill out this table
+dt_final <- dt_final[!is.na(wildtype)]
+
+#set empty columns to fill with indexed sites
+dt_final$site <- as.character(NA)
+dt_final$site_SARS2 <- as.character(NA)
+
+#do by bg with if/else looping
+for(i in 1:nrow(dt_final)){
+  if(dt_final[i,target]=="Wuhan_Hu_1"){
+    dt_final[i,site := as.character(RBD_sites[RBD_sites$site_SARS2_RBD==dt_final[i,position] & !is.na(RBD_sites$site_SARS2_RBD),"site_SARS2_spike"])]
+    dt_final[i,site_SARS2 := as.character(RBD_sites[RBD_sites$site_SARS2_RBD==dt_final[i,position] & !is.na(RBD_sites$site_SARS2_RBD),"site_SARS2_spike"])]
+  }else if(dt_final[i,target]=="RshSTT182"){
+    dt_final[i,site := as.character(RBD_sites[RBD_sites$site_RshSTT182_RBD==dt_final[i,position] & !is.na(RBD_sites$site_RshSTT182_RBD),"site_RshSTT182_spike"])]
+    dt_final[i,site_SARS2 := as.character(RBD_sites[RBD_sites$site_RshSTT182_RBD==dt_final[i,position] & !is.na(RBD_sites$site_RshSTT182_RBD),"site_SARS2_spike"])]
+  }else if(dt_final[i,target]=="PRD0038"){
+    dt_final[i,site:=as.character(RBD_sites[RBD_sites$site_PRD0038_RBD==dt_final[i,position] & !is.na(RBD_sites$site_PRD0038_RBD),"site_PRD0038_spike"])]
+    dt_final[i,site_SARS2 := as.character(RBD_sites[RBD_sites$site_PRD0038_RBD==dt_final[i,position] & !is.na(RBD_sites$site_PRD0038_RBD),"site_SARS2_spike"])]
+  }else if(dt_final[i,target]=="SARS1"){
+    dt_final[i,site := as.character(RBD_sites[RBD_sites$site_SARS1_RBD==dt_final[i,position] & !is.na(RBD_sites$site_SARS1_RBD),"site_SARS1_spike"])]
+    dt_final[i,site_SARS2 := as.character(RBD_sites[RBD_sites$site_SARS1_RBD==dt_final[i,position] & !is.na(RBD_sites$site_SARS1_RBD),"site_SARS2_spike"])]
+  }else if(dt_final[i,target]=="RsYN04"){
+    dt_final[i,site := as.character(RBD_sites[RBD_sites$site_RsYN04_RBD==dt_final[i,position] & !is.na(RBD_sites$site_RsYN04_RBD),"site_RsYN04_spike"])]
+    dt_final[i,site_SARS2 := as.character(RBD_sites[RBD_sites$site_RsYN04_RBD==dt_final[i,position] & !is.na(RBD_sites$site_RsYN04_RBD),"site_SARS2_spike"])]
+  }else if(dt_final[i,target]=="RmYN02"){
+    dt_final[i,site := as.character(RBD_sites[RBD_sites$site_RmYN02_RBD==dt_final[i,position] & !is.na(RBD_sites$site_RmYN02_RBD),"site_RmYN02_spike"])]
+    dt_final[i,site_SARS2 := as.character(RBD_sites[RBD_sites$site_RmYN02_RBD==dt_final[i,position] & !is.na(RBD_sites$site_RmYN02_RBD),"site_SARS2_spike"])]
+  }
+}
+
+#add single mutation string indicators
+dt_final[,mutation:=paste(wildtype,site,mutant,sep=""),by=c("wildtype","site","mutant")]
+dt_final[,mutation_SARS2:=paste(wildtype,site_SARS2,mutant,sep=""),by=c("wildtype","site_SARS2","mutant")]
+
+dt_final <- unique(dt_final[,.(target,wildtype,site,site_SARS2,mutant,mutation,mutation_SARS2,
+                               bind_huACE2_tot,delta_bind_huACE2_tot,n_bc_bind_huACE2_tot,n_libs_bind_huACE2_tot,
+                               bind_RshACE2_tot,delta_bind_RshACE2_tot,n_bc_bind_RshACE2_tot,n_libs_bind_RshACE2_tot,
+                               expr_tot,delta_expr_tot,n_bc_expr_tot,n_libs_expr_tot)])
+
+#add the rep1 and rep2 bind and expr averages
+dt_final[,bind_huACE2_rep1 := dt_mutant[library=="pool1" & !is.na(wildtype), mean_bind_huACE2]]
+dt_final[,bind_huACE2_rep2 := dt_mutant[library=="pool2" & !is.na(wildtype), mean_bind_huACE2]]
+dt_final[,bind_RshACE2_rep1 := dt_mutant[library=="pool1" & !is.na(wildtype), mean_bind_RshACE2]]
+dt_final[,expr_rep1 := dt_mutant[library=="pool1" & !is.na(wildtype), mean_expr]]
+dt_final[,expr_rep2 := dt_mutant[library=="pool2" & !is.na(wildtype), mean_expr]]
+
+#rename some of the columns
+setnames(dt_final,"bind_huACE2_tot","bind_huACE2")
+setnames(dt_final,"delta_bind_huACE2_tot","delta_bind_huACE2")
+setnames(dt_final,"n_bc_bind_huACE2_tot","n_bc_bind_huACE2")
+setnames(dt_final,"n_libs_bind_huACE2_tot","n_libs_bind_huACE2")
+
+setnames(dt_final,"bind_RshACE2_tot","bind_RshACE2")
+setnames(dt_final,"delta_bind_RshACE2_tot","delta_bind_RshACE2")
+setnames(dt_final,"n_bc_bind_RshACE2_tot","n_bc_bind_RshACE2")
+setnames(dt_final,"n_libs_bind_RshACE2_tot","n_libs_bind_RshACE2")
+
+setnames(dt_final,"expr_tot","expr")
+setnames(dt_final,"delta_expr_tot","delta_expr")
+setnames(dt_final,"n_bc_expr_tot","n_bc_expr")
+setnames(dt_final,"n_libs_expr_tot","n_libs_expr")
+
+```
+
+
+Censor any measurements that are from a single bc? don't do this for now
+```{r censor_n_barcodes_libs, echo=T, fig.width=8, fig.height=4, fig.align="center", dpi=300,dev="png"}
+# min_bc <- 2
+# min_lib <- 2
+#  
+# dt_final[n_bc_bind < min_bc, c("bind","delta_bind","n_bc_bind","n_libs_bind") := list(NA,NA,NA,NA)]
+# dt_final[n_bc_expr < min_bc, c("expr","delta_expr","n_bc_expr","n_libs_expr") := list(NA,NA,NA,NA)]
+```
+
+
+Coverage stats on n_barcodes for different measurements in the final pooled measurements.
+
+```{r n_barcode_plots, echo=T, fig.width=8, fig.height=3, fig.align="center", dpi=300,dev="png"}
+par(mfrow=c(1,3))
+hist(dt_final[wildtype!=mutant, n_bc_bind_huACE2],col="gray50",main=paste("mutant bind_huACE2 score,\nmedian ",median(dt_final[wildtype!=mutant, n_bc_bind_huACE2],na.rm=T),sep=""),right=F,breaks=max(dt_final[wildtype!=mutant, n_bc_bind_huACE2],na.rm=T),xlab="")
+
+hist(dt_final[wildtype!=mutant, n_bc_bind_RshACE2],col="gray50",main=paste("mutant bind_RshACE2 score,\nmedian ",median(dt_final[wildtype!=mutant, n_bc_bind_RshACE2],na.rm=T),sep=""),right=F,breaks=max(dt_final[wildtype!=mutant, n_bc_bind_RshACE2],na.rm=T),xlab="")
+
+hist(dt_final[wildtype!=mutant, n_bc_expr],col="gray50",main=paste("mutant expr score,\nmedian ",median(dt_final[wildtype!=mutant, n_bc_expr],na.rm=T),sep=""),right=F,breaks=max(dt_final[wildtype!=mutant, n_bc_expr],na.rm=T),xlab="")
+
+invisible(dev.print(pdf, paste(config$final_variant_scores_dir,"/histogram_n_bc_per_geno_pooled-libs.pdf",sep="")))
+```
+
+
+## Heatmaps!
+
+Order factor variables for plotting
+
+```{r order_plotting_factors}
+
+#order targets for plotting
+dt_final[target=="Wuhan_Hu_1",target:="SARS-CoV-2"]
+dt_final[target=="SARS1",target:="SARS-CoV-1"]
+dt_final$target <- factor(dt_final$target,levels=c("SARS-CoV-2","RshSTT182","SARS-CoV-1","RsYN04","PRD0038","RmYN02"))
+#order mutant as a factor for grouping by rough biochemical grouping
+dt_final$mutant <- factor(dt_final$mutant, levels=c("C","P","G","V","M","L","I","A","F","W","Y","T","S","N","Q","E","D","H","K","R"))
+#order the sites character vector (becuase of 372a number for the PRD0038 insertion)
+dt_final$site_SARS2 <-factor(dt_final$site_SARS2,levels=sort(unique(dt_final$site_SARS2)))
+dt_final$site <-factor(dt_final$site,levels=sort(unique(dt_final$site)))
+
+#add character vector indicating wildtype to use as plotting symbols for wt
+dt_final[,wildtype_indicator := ""]
+dt_final[as.character(mutant)==as.character(wildtype),wildtype_indicator := "x"]
+
+#make temp long-form data frame
+temp <- data.table::melt(dt_final[, .(target,site,site_SARS2,mutant,
+                                      bind_huACE2,delta_bind_huACE2,
+                                      bind_RshACE2,delta_bind_RshACE2,
+                                      expr,delta_expr,wildtype_indicator)],
+                         id.vars=c("target","site","site_SARS2","mutant","wildtype_indicator"),
+                         measure.vars=c("bind_huACE2","delta_bind_huACE2",
+                                        "bind_RshACE2","delta_bind_RshACE2",
+                                        "expr","delta_expr"),
+                         variable.name="measurement",value.name="value")
+
+#for method to duplicate aa labels on right side of plot https://github.com/tidyverse/ggplot2/issues/3171
+guide_axis_label_trans <- function(label_trans = identity, ...) {
+  axis_guide <- guide_axis(...)
+  axis_guide$label_trans <- rlang::as_function(label_trans)
+  class(axis_guide) <- c("guide_axis_trans", class(axis_guide))
+  axis_guide
+}
+
+guide_train.guide_axis_trans <- function(x, ...) {
+  trained <- NextMethod()
+  trained$key$.label <- x$label_trans(trained$key$.label)
+  trained
+}
+
+```
+Make heatmaps faceted by target, showing raw affinity and delta-affinity of muts relative to respective
+
+First, log10Ka huACE2
+
+```{r heatmap_DMS_log10Ka-by-target_huACE2, fig.width=25,fig.height=15,fig.align="center", dpi=500,dev="png",echo=T}
+p1 <- ggplot(temp[measurement=="bind_huACE2",],aes(site_SARS2,mutant))+geom_tile(aes(fill=value),color="black",lwd=0.1)+
+  scale_fill_gradientn(colours=c("#FFFFFF","#003366"),limits=c(5,11.1),na.value="yellow")+
+  #scale_fill_gradientn(colours=c("#FFFFFF","#FFFFFF","#003366"),limits=c(5,12),values=c(0,1/7,7/7),na.value="yellow")+ #three notches in case I want to 'censor' closer to the 5 boundary condition
+  #scale_x_continuous(expand=c(0,0),breaks=c(331,seq(335,530,by=5)))+
+  labs(x="",y="")+theme_classic(base_size=9)+
+  coord_equal()+theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.6,face="bold",size=10),axis.text.y=element_text(face="bold",size=10))+
+  facet_wrap(~target,nrow=6)+
+  guides(y.sec=guide_axis_label_trans())+
+  geom_text(aes(label=wildtype_indicator),size=2,color="gray10")+
+  theme(strip.text.x = element_text(size = 18))
+
+p1
+invisible(dev.print(pdf, paste(config$final_variant_scores_dir,"/heatmap_SSM_log10Ka-by-target_huACE2.pdf",sep="")))
+```
+
+
+Second, illustrating delta_log10Ka (dimer) grouped by SSM position.
+
+```{r heatmap_DMS_delta-log10Ka-by-target_huACE2, fig.width=25,fig.height=15,fig.align="center", dpi=500,dev="png",echo=T}
+p1 <- ggplot(temp[measurement=="delta_bind_huACE2",],aes(site_SARS2,mutant))+geom_tile(aes(fill=value),color="black",lwd=0.1)+
+  scale_fill_gradientn(colours=c("#A94E35","#A94E35","#F48365","#FFFFFF","#7378B9","#383C6C","#383C6C"),limits=c(-6,4),values=c(0/10,3/10,4.5/10,6/10,7/10,8/10, 10/10),na.value="yellow")+
+  #scale_x_continuous(expand=c(0,0),breaks=c(331,seq(335,530,by=5)))+
+  labs(x="",y="")+theme_classic(base_size=9)+
+  coord_equal()+theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.6,face="bold",size=10),axis.text.y=element_text(face="bold",size=10))+
+  facet_wrap(~target,nrow=6)+
+  guides(y.sec=guide_axis_label_trans())+
+  geom_text(aes(label=wildtype_indicator),size=2,color="gray10")+
+  theme(strip.text.x = element_text(size = 18))
+
+p1
+invisible(dev.print(pdf, paste(config$final_variant_scores_dir,"/heatmap_SSM_delta-log10Ka-by-target_huACE2.pdf",sep="")))
+```
+
+Make plots for delta-Kd huACE2 for RshSTT182 alone -- first, using SARS2 numbering
+
+```{r heatmap_DMS_delta-log10Ka_RshSTT182-SARS2-numbering_huACE2, fig.width=25,fig.height=5,fig.align="center", dpi=500,dev="png",echo=T}
+p1 <- ggplot(temp[target=="RshSTT182" & measurement=="delta_bind_huACE2",], aes(site_SARS2,mutant))+
+  geom_tile(aes(fill=value),color="black",lwd=0.1)+
+  scale_fill_gradientn(colours=c("#A94E35","#A94E35","#F48365","#FFFFFF","#7378B9","#383C6C"),limits=c(-4,1),values=c(0/5,1/5,2.5/5,4/5,4.5/5,5/5),na.value="yellow")+
+  #scale_x_continuous(expand=c(0,0),breaks=c(331,seq(335,530,by=5)))+
+  labs(x="",y="")+theme_classic(base_size=9)+
+  coord_equal()+theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.6,face="bold",size=10),axis.text.y=element_text(face="bold",size=10))+
+  guides(y.sec=guide_axis_label_trans())+
+  geom_text(aes(label=wildtype_indicator),size=2,color="gray10")
+
+p1
+invisible(dev.print(pdf, paste(config$final_variant_scores_dir,"/heatmap_SSM_delta-log10Ka_RshSTT182-SARS2-numbering_huACE2.pdf",sep="")))
+```
+
+And, using its own numbering
+```{r heatmap_DMS_delta-log10Ka_RshSTT182-self-numbering_huACE2, fig.width=25,fig.height=5,fig.align="center", dpi=500,dev="png",echo=T}
+p1 <- ggplot(temp[target=="RshSTT182" & measurement=="delta_bind_huACE2",], aes(site,mutant))+
+  geom_tile(aes(fill=value),color="black",lwd=0.1)+
+  scale_fill_gradientn(colours=c("#A94E35","#A94E35","#F48365","#FFFFFF","#7378B9","#383C6C"),limits=c(-4,1),values=c(0/5,1/5,2.5/5,4/5,4.5/5,5/5),na.value="yellow")+
+  #scale_x_continuous(expand=c(0,0),breaks=c(331,seq(335,530,by=5)))+
+  labs(x="",y="")+theme_classic(base_size=9)+
+  coord_equal()+theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.6,face="bold",size=10),axis.text.y=element_text(face="bold",size=10))+
+  guides(y.sec=guide_axis_label_trans())+
+  geom_text(aes(label=wildtype_indicator),size=2,color="gray10")
+
+p1
+invisible(dev.print(pdf, paste(config$final_variant_scores_dir,"/heatmap_SSM_delta-log10Ka_RshSTT182-self-numbering_huACE2.pdf",sep="")))
+```
+
+Same set of plots, log10Ka RshACE2
+
+```{r heatmap_DMS_log10Ka-by-target_RshACE2, fig.width=25,fig.height=15,fig.align="center", dpi=500,dev="png",echo=T}
+p1 <- ggplot(temp[measurement=="bind_RshACE2",],aes(site_SARS2,mutant))+geom_tile(aes(fill=value),color="black",lwd=0.1)+
+  scale_fill_gradientn(colours=c("#FFFFFF","#003366"),limits=c(5,11.1),na.value="yellow")+
+  #scale_fill_gradientn(colours=c("#FFFFFF","#FFFFFF","#003366"),limits=c(5,12),values=c(0,1/7,7/7),na.value="yellow")+ #three notches in case I want to 'censor' closer to the 5 boundary condition
+  #scale_x_continuous(expand=c(0,0),breaks=c(331,seq(335,530,by=5)))+
+  labs(x="",y="")+theme_classic(base_size=9)+
+  coord_equal()+theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.6,face="bold",size=10),axis.text.y=element_text(face="bold",size=10))+
+  facet_wrap(~target,nrow=6)+
+  guides(y.sec=guide_axis_label_trans())+
+  geom_text(aes(label=wildtype_indicator),size=2,color="gray10")+
+  theme(strip.text.x = element_text(size = 18))
+
+p1
+invisible(dev.print(pdf, paste(config$final_variant_scores_dir,"/heatmap_SSM_log10Ka-by-target_RshACE2.pdf",sep="")))
+```
+
+
+Second, illustrating delta_log10Ka (dimer) grouped by SSM position.
+
+```{r heatmap_DMS_delta-log10Ka-by-target_RshACE2, fig.width=25,fig.height=15,fig.align="center", dpi=500,dev="png",echo=T}
+p1 <- ggplot(temp[measurement=="delta_bind_RshACE2",],aes(site_SARS2,mutant))+geom_tile(aes(fill=value),color="black",lwd=0.1)+
+  scale_fill_gradientn(colours=c("#A94E35","#F48365","#FFFFFF","#7378B9","#383C6C"),
+                       limits=c(-4,3),
+                       values=c(0/7,2/7,4/7,5.5/7,7/7),na.value="yellow")+
+  #scale_x_continuous(expand=c(0,0),breaks=c(331,seq(335,530,by=5)))+
+  labs(x="",y="")+theme_classic(base_size=9)+
+  coord_equal()+theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.6,face="bold",size=10),axis.text.y=element_text(face="bold",size=10))+
+  facet_wrap(~target,nrow=6)+
+  guides(y.sec=guide_axis_label_trans())+
+  geom_text(aes(label=wildtype_indicator),size=2,color="gray10")+
+  theme(strip.text.x = element_text(size = 18))
+
+p1
+invisible(dev.print(pdf, paste(config$final_variant_scores_dir,"/heatmap_SSM_delta-log10Ka-by-target_RshACE2.pdf",sep="")))
+```
+
+Make plots for delta-Kd RshACE2 for RshSTT182 alone -- first, using SARS2 numbering
+
+```{r heatmap_DMS_delta-log10Ka_RshSTT182-SARS2-numbering_RshACE2, fig.width=25,fig.height=5,fig.align="center", dpi=500,dev="png",echo=T}
+p1 <- ggplot(temp[target=="RshSTT182" & measurement=="delta_bind_RshACE2",], aes(site_SARS2,mutant))+
+  geom_tile(aes(fill=value),color="black",lwd=0.1)+
+  scale_fill_gradientn(colours=c("#A94E35","#F48365","#FFFFFF","#7378B9","#383C6C"),
+                       limits=c(-4,3),
+                       values=c(0/7,2/7,4/7,5.5/7,7/7),na.value="yellow")+
+  #scale_x_continuous(expand=c(0,0),breaks=c(331,seq(335,530,by=5)))+
+  labs(x="",y="")+theme_classic(base_size=9)+
+  coord_equal()+theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.6,face="bold",size=10),axis.text.y=element_text(face="bold",size=10))+
+  guides(y.sec=guide_axis_label_trans())+
+  geom_text(aes(label=wildtype_indicator),size=2,color="gray10")
+
+p1
+invisible(dev.print(pdf, paste(config$final_variant_scores_dir,"/heatmap_SSM_delta-log10Ka_RshSTT182-SARS2-numbering_RshACE2.pdf",sep="")))
+```
+
+And, using its own numbering
+```{r heatmap_DMS_delta-log10Ka_RshSTT182-self-numbering_RshACE2, fig.width=25,fig.height=5,fig.align="center", dpi=500,dev="png",echo=T}
+p1 <- ggplot(temp[target=="RshSTT182" & measurement=="delta_bind_RshACE2",], aes(site,mutant))+
+  geom_tile(aes(fill=value),color="black",lwd=0.1)+
+  scale_fill_gradientn(colours=c("#A94E35","#F48365","#FFFFFF","#7378B9","#383C6C"),
+                       limits=c(-4,3),
+                       values=c(0/7,2/7,4/7,5.5/7,7/7),na.value="yellow")+
+  #scale_x_continuous(expand=c(0,0),breaks=c(331,seq(335,530,by=5)))+
+  labs(x="",y="")+theme_classic(base_size=9)+
+  coord_equal()+theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.6,face="bold",size=10),axis.text.y=element_text(face="bold",size=10))+
+  guides(y.sec=guide_axis_label_trans())+
+  geom_text(aes(label=wildtype_indicator),size=2,color="gray10")
+
+p1
+invisible(dev.print(pdf, paste(config$final_variant_scores_dir,"/heatmap_SSM_delta-log10Ka_RshSTT182-self-numbering_RshACE2.pdf",sep="")))
+```
+
+Make heatmaps faceted by target, showing raw expression and delta-expression of muts relative to respective wildtype
+
+```{r heatmap_DMS_expression-by-target, fig.width=25,fig.height=15,fig.align="center", dpi=500,dev="png",echo=T}
+p1 <- ggplot(temp[measurement=="expr",],aes(site_SARS2,mutant))+geom_tile(aes(fill=value),color="black",lwd=0.1)+
+  scale_fill_gradientn(colours=c("#FFFFFF","#003366"),limits=c(5,11.5),na.value="yellow")+
+  #scale_fill_gradientn(colours=c("#FFFFFF","#FFFFFF","#003366"),limits=c(5,11.2),values=c(0,1/7,7/7),na.value="yellow")+ #three notches in case I want to 'censor' closer to the 5 boundary condition
+  #scale_x_continuous(expand=c(0,0),breaks=c(331,seq(335,530,by=5)))+
+  labs(x="",y="")+theme_classic(base_size=9)+
+  coord_equal()+theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.6,face="bold",size=10),axis.text.y=element_text(face="bold",size=10))+
+  facet_wrap(~target,nrow=6)+
+  guides(y.sec=guide_axis_label_trans())+
+  geom_text(aes(label=wildtype_indicator),size=2,color="gray10")+
+  theme(strip.text.x = element_text(size = 18))
+
+p1
+invisible(dev.print(pdf, paste(config$final_variant_scores_dir,"/heatmap_SSM_expression-by-target.pdf",sep="")))
+```
+
+Second, illustrating delta_expression grouped by SSM position.
+
+```{r heatmap_DMS_delta-expression-by-target, fig.width=25,fig.height=15,fig.align="center", dpi=500,dev="png",echo=T}
+p1 <- ggplot(temp[measurement=="delta_expr",],aes(site_SARS2,mutant))+geom_tile(aes(fill=value),color="black",lwd=0.1)+
+  scale_fill_gradientn(colours=c("#A94E35","#A94E35","#F48365","#FFFFFF","#7378B9","#383C6C"),limits=c(-5.5,1),values=c(0/6.5,1.5/6.5,3.5/6.5,5.5/6.5,6/6.5,6.5/6.5),na.value="yellow")+
+  #scale_x_continuous(expand=c(0,0),breaks=c(331,seq(335,530,by=5)))+
+  labs(x="",y="")+theme_classic(base_size=9)+
+  coord_equal()+theme(axis.text.x=element_text(angle=90,hjust=1,vjust=0.6,face="bold",size=10),axis.text.y=element_text(face="bold",size=10))+
+  facet_wrap(~target,nrow=6)+
+  guides(y.sec=guide_axis_label_trans())+
+  geom_text(aes(label=wildtype_indicator),size=2,color="gray10")+
+  theme(strip.text.x = element_text(size = 18))
+
+p1
+invisible(dev.print(pdf, paste(config$final_variant_scores_dir,"/heatmap_SSM_delta-expression-by-target.pdf",sep="")))
+```
+
+That's the data! Other analyses in additional notebooks
+
+Save output files.
+
+```{r outputs}
+dt_final[,.(target,wildtype,site,site_SARS2,mutant,mutation,mutation_SARS2,
+            bind_huACE2,delta_bind_huACE2,n_bc_bind_huACE2,n_libs_bind_huACE2, bind_huACE2_rep1, bind_huACE2_rep2,
+            bind_RshACE2,delta_bind_RshACE2,n_bc_bind_RshACE2,n_libs_bind_RshACE2, bind_RshACE2_rep1,
+            expr,delta_expr,n_bc_expr,n_libs_expr, expr_rep1, expr_rep2)] %>%
+  mutate_if(is.numeric, round, digits=5) %>%
+  write.csv(file=config$final_variant_scores_mut_file, row.names=F,quote=F)
+```
+
+
+
+
+

@@ -1,0 +1,69 @@
+LOCUS       RsYN04        1067 bp    DNA        linear       21-SEP-2021
+DEFINITION  PacBio amplicon for deep mutational scanning of RsYN04 RBD
+ACCESSION   None
+SOURCE      Tyler Starr
+  ORGANISM  .
+COMMENT     PacBio amplicon for RsYN04 RBD libraries.
+COMMENT     
+COMMENT     ApEinfo:methylated:1
+FEATURES             Location/Qualifiers
+     termini5        1..33
+                     /locus_tag="termini5"
+                     /label="termini5"
+                     /ApEinfo_label="termini5"
+                     /ApEinfo_fwdcolor="#fefb00"
+                     /ApEinfo_revcolor="green"
+                     /ApEinfo_graphicformat="arrow_data {{0 1 2 0 0 -1} {} 0}
+                     width 5 offset 0"
+     spacer          625..1045
+                     /locus_tag="spacer"
+                     /label="spacer"
+                     /ApEinfo_label="spacer"
+                     /ApEinfo_fwdcolor="#fefb00"
+                     /ApEinfo_revcolor="green"
+                     /ApEinfo_graphicformat="arrow_data {{0 1 2 0 0 -1} {} 0}
+                     width 5 offset 0"
+     barcode         1046..1061
+                     /locus_tag="barcode"
+                     /label="barcode"
+                     /ApEinfo_label="barcode"
+                     /ApEinfo_fwdcolor="#00f900"
+                     /ApEinfo_revcolor="green"
+                     /ApEinfo_graphicformat="arrow_data {{0 1 2 0 0 -1} {} 0}
+                     width 5 offset 0"
+     termini3        1062..1067
+                     /locus_tag="termini3"
+                     /label="termini3"
+                     /ApEinfo_label="termini3"
+                     /ApEinfo_fwdcolor="#fefb00"
+                     /ApEinfo_revcolor="green"
+                     /ApEinfo_graphicformat="arrow_data {{0 1 2 0 0 -1} {} 0}
+                     width 5 offset 0"
+     gene            34..624
+                     /locus_tag="gene"
+                     /label="gene"
+                     /ApEinfo_label="gene"
+                     /ApEinfo_fwdcolor="#ff797d"
+                     /ApEinfo_revcolor="#ff102f"
+                     /ApEinfo_graphicformat="arrow_data {{0 0.5 0 1 2 0 0 -1 0
+                     -0.5} {} 0} width 5 offset 0"
+ORIGIN
+        1 ggccgcggag gcggagggtc ggctagccat atgAATATCA CCAACCTTTG TCCGTTTAGC
+       61 CAGGTGTTCA ATGCTACGAG GTTCCCAAGC GTCTATGCCT GGACGAGAGA AAGGATCAGC
+      121 AATTGCATCG CTGACTATTC TGTACTATAT AATTCCACTT CATTTTCAAC ATTTAGATGC
+      181 TACGGCGTTA GCCCTACCAA GTTAAACGAC TTATGCTTCT CTAACGTGTA TGCAGACTCT
+      241 ATGGTGGTAA GAGGAGACGA AGTCAGACAG ATCGCACCTT CTCAAACCGG CGTGATCGCG
+      301 GATTACAATT ACAAGCTGCC CGACGATTTT ACAGGTTGTG TTATTGCGTG GAACTCCAAA
+      361 GCCAAAGATG AGAACGGGCA ATACTTCTAT AGATTGTTCA GGAAGTCTAA GCTGTTGCCC
+      421 TTTCAACGTG ACGTCAGTAA CGTCACTTAT GGCAGTGGAA AAAATGACGG GTGTAACCCG
+      481 TCCGAGGCGG ATTGTTATTG GCCGTTACTG AAATATGGGT TCACTTCCTC CGTTTCCCAA
+      541 GATTACCAGC CCTACAGGGT GGTTGTTCTG TCATTTGAAT TATTGAACGC TCCGGCGACT
+      601 GTTTGCGGTC CAAAAAGGAG TACActcgag gggggcggtt ccgaacaaaa gcttatttct
+      661 gaagaggact tgtaatagag atctgataac aacagtgtag atgtaacaaa atcgactttg
+      721 ttcccactgt acttttagct cgtacaaaat acaatatact tttcatttct ccgtaaacaa
+      781 catgttttcc catgtaatat ccttttctat ttttcgttcc gttaccaact ttacacatac
+      841 tttatatagc tattcacttc tatacactaa aaaactaaga caattttaat tttgctgcct
+      901 gccatatttc aatttgttat aaattcctat aatttatcct attagtagct aaaaaaagat
+      961 gaatgtgaat cgaatcctaa gagaattaat gatacggcga ccaccgagat ctacactctt
+     1021 tccctacacg acgctcttcc gatctNNNNN NNNNNNNNNN Ngcggcc 
+//

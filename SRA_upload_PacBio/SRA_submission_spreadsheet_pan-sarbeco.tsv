@@ -1,0 +1,2 @@
+biosample_accession	library_ID	title	library_strategy	library_source	library_selection	library_layout	platform	instrument_model	design_description	filetype	filename
+SAMN34384738	pan-sarbeco_lib46_PacBio_CCSs	PacBio CCSs linking variants to barcodes for pan-sarbeco RBD homolog library	Synthetic-Long-Read	SYNTHETIC	Restriction Digest	single	PACBIO_SMRT	PacBio Sequel II	Restriction digest of plasmids carrying barcoded RBD variants	fastq	lib46_ccs.fastq.gz

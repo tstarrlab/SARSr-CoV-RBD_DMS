@@ -1,0 +1,376 @@
+# config for analysis
+
+# conda environment file
+environment: environment.yml
+
+# most CPUs to ever use at once
+max_cpus: 16
+
+# amplicons sequenced by PacBio for wildtype homologs pool
+amplicons: data/PacBio_amplicons.gb
+amplicons_RshSTT182: data/PacBio_amplicon_RshSTT182.gb
+amplicons_PRD-0038: data/PacBio_amplicon_PRD0038.gb
+amplicons_SARS-CoV-1_2693: data/PacBio_amplicon_SARS1.gb
+amplicons_RsYN04: data/PacBio_amplicon_RsYN04.gb
+amplicons_RmYN02: data/PacBio_amplicon_RmYN02.gb
+
+# how to parse the amplicon
+feature_parse_specs: data/feature_parse_specs.yaml
+feature_parse_specs_RshSTT182: data/feature_parse_specs_RshSTT182.yaml
+feature_parse_specs_PRD-0038: data/feature_parse_specs_PRD0038.yaml
+feature_parse_specs_SARS-CoV-1_2693: data/feature_parse_specs_SARS1.yaml
+feature_parse_specs_RsYN04: data/feature_parse_specs_RsYN04.yaml
+feature_parse_specs_RmYN02: data/feature_parse_specs_RmYN02.yaml
+
+# do we get the sequencing data from the 'HutchServer' or 'SRA'?
+seqdata_source: HutchServer
+
+# list of PacBio sequencing runs linking barcodes to variants
+pacbio_runs: data/PacBio_runs.csv
+
+# list of Illumina sequencing runs of barcodes
+barcode_runs: data/barcode_runs.csv
+
+# wildtype sequence of mutagenized gene (for SARS2) -- can't remember if this is used at all?
+wildtype_sequence: data/wildtype_sequence.fasta
+site_number_offset: 330  # add this to sequential sites to get RBD numbering
+
+# pdbs for mapping, analysis
+pdb_6m0j: data/6m0j.pdb
+
+# URLs from which we download binding & expression of mutants & variants from prior experiments
+WH1_bc_variant_lookup_url: https://media.githubusercontent.com/media/jbloomlab/SARS-CoV-2-RBD_DMS_variants/main/results/variants/codon_variant_table_Wuhan_Hu_1.csv
+WH1_mut_antibody_escape_url: https://media.githubusercontent.com/media/jbloomlab/SARS2_RBD_Ab_escape_maps/main/processed_data/escape_data.csv
+SARSr_lib47_mut_bind_expr_url: https://raw.githubusercontent.com/jbloomlab/SARSr-CoV_homolog_survey/master/results/final_variant_scores/wt_variant_scores.csv
+SARSr_lib46_mut_bind_expr_url: https://raw.githubusercontent.com/jbloomlab/SARSr-CoV_homolog_survey/master/results/final_variant_scores/mut_variant_scores.csv
+
+
+
+# list of the primary targets for which we are calling mutations in lib46
+mutated_targets:
+  - AncSarbecovirus_MAP
+  - AncAsia_MAP
+  - AncSARS2a_MAP
+  - AncSARS2c_MAP
+  - SARS-CoV-2_WH1
+  - SARS-CoV-2_2649
+  - GD-Pangolin
+  - RaTG13
+  - AncSARS1a_MAP
+  - Rs7327
+  - SARS-CoV-1_Urbani_HP03L
+  - SARS-CoV-1_2693
+  - SARS-CoV-1_PC4-137_PC04
+  - AncClade2_MAP
+  - BM48-31
+  - BtKY72
+
+# groups and orders of targets for plotting for lib46
+mutated_targets_ordered:
+  - AncSarbecovirus_MAP
+  - BM48-31
+  - BtKY72
+  - AncAsia_MAP
+  - AncSARS2a_MAP
+  - GD-Pangolin
+  - AncSARS2c_MAP
+  - SARS-CoV-2_WH1
+  - RaTG13
+  - AncSARS1a_MAP
+  - Rs7327
+  - SARS-CoV-1_2693
+  - SARS-CoV-1_PC4-137_PC04
+  - AncClade2_MAP
+
+
+targets_ordered:
+  - AncSarbecovirus_MAP
+  - AncSarbecovirus_alt
+  - AncSarbecovirus_alt1_ins117ins118
+  - AncSarbecovirus_tree1
+  - AncEurAf_alt
+  - AncEurAf_tree1
+  - BM48-31
+  - BB9904
+  - BtKY72
+  - PRD-0038
+  - PDF-2370
+  - Khosta-1
+  - Khosta-2
+  - RhGB01
+  - RsYN04
+  - AncAsia_MAP
+  - AncAsia_alt
+  - AncAsia_tree1
+  - AncAsia_tree2
+  - AncSARS2a_MAP
+  - AncSARS2a_alt
+  - AncSARS2c_MAP
+  - SARS-CoV-2_WH1
+  - SARS-CoV-2_Alpha
+  - SARS-CoV-2_Beta
+  - SARS-CoV-2_Delta
+  - BANAL-20-103
+  - BANAL-20-236
+  - RaTG13
+  - GD-Pangolin
+  - GX-Pangolin
+  - RshSTT182
+  - Rc-o319
+  - AncSARS1a_MAP
+  - AncSARS1a_alt
+  - AncSARS1a_tree1
+  - AncSARS1a_tree2
+  - AncSARS1c_MAP
+  - AncSARS-CoV-1_MAP
+  - AncSARS-CoV-1_alt
+  - SARS-CoV-1_Sin852_HP03L
+  - SARS-CoV-1_GZ-C_HP03L
+  - SARS-CoV-1_Sino1-11_HP03L
+  - SARS-CoV-1_2693
+  - SARS-CoV-1_HGZ8L1-A_HP03E
+  - SARS-CoV-1_GD01_HP03L
+  - SARS-CoV-1_PC4-127_PC04
+  - SARS-CoV-1_PC4-13_PC04
+  - SARS-CoV-1_PC4-137_PC04
+  - SARS-CoV-1_GD03T0013_HP04
+  - SARS-CoV-1_GZ0402_HP04
+  - SARS-CoV-1_SZ1_PC03
+  - YN2020B
+  - LYRa11
+  - WIV1
+  - Rs7327
+  - Rs4231
+  - RsSHC014
+  - Rs4084
+  - AncClade2_MAP
+  - AncClade2_alt
+  - AncClade2_tree2
+  - AncClade2_alt1_subs-only
+  - AncClade2_alt2_del1-only
+  - AncClade2_alt3_del2-only
+  - AncClade2_alt4_dels-only
+  - Rf4092
+  - RmYN02
+  - YN2013
+  - ZC45
+  - ZXC21
+  - Rf1
+  - JL2012
+  - 273-2005
+  - HeB2013
+  - HuB2013
+  - Rs4247
+  - Longquan-140
+  - HKU3-8
+  - HKU3-1
+  - GX2013
+  - Shaanxi2011
+  - 279-2005
+  - As6526
+  - Yunnan2011
+  - Rs4237
+  - Rs4081
+  - Rp3
+
+
+EurAf_extant:
+  - BM48-31
+  - BB9904
+  - BtKY72
+  - PRD-0038
+  - PDF-2370
+  - Khosta-1
+  - Khosta-2
+  - RhGB01
+  
+RsYN04_extant:
+  - RsYN04
+
+SARS2_extant:
+  - SARS-CoV-2_WH1
+  - SARS-CoV-2_Alpha
+  - SARS-CoV-2_Beta
+  - SARS-CoV-2_Delta
+  - BANAL-20-103
+  - BANAL-20-236
+  - RaTG13
+  - GD-Pangolin
+  - GX-Pangolin
+  - RshSTT182
+  - Rc-o319
+  
+SARS1_extant:
+  - SARS-CoV-1_Sin852_HP03L
+  - SARS-CoV-1_GZ-C_HP03L
+  - SARS-CoV-1_Sino1-11_HP03L
+  - SARS-CoV-1_2693
+  - SARS-CoV-1_HGZ8L1-A_HP03E
+  - SARS-CoV-1_GD01_HP03L
+  - SARS-CoV-1_PC4-127_PC04
+  - SARS-CoV-1_PC4-13_PC04
+  - SARS-CoV-1_PC4-137_PC04
+  - SARS-CoV-1_GD03T0013_HP04
+  - SARS-CoV-1_GZ0402_HP04
+  - SARS-CoV-1_SZ1_PC03
+  - YN2020B
+  - LYRa11
+  - WIV1
+  - Rs7327
+  - Rs4231
+  - RsSHC014
+  - Rs4084
+
+Clade2_extant:
+  - Rf4092
+  - RmYN02
+  - YN2013
+  - ZC45
+  - ZXC21
+  - Rf1
+  - JL2012
+  - 273-2005
+  - HeB2013
+  - HuB2013
+  - Rs4247
+  - Longquan-140
+  - HKU3-8
+  - HKU3-1
+  - GX2013
+  - Shaanxi2011
+  - 279-2005
+  - As6526
+  - Yunnan2011
+  - Rs4237
+  - Rs4081
+  - Rp3
+
+ancestors_MAP:
+  - AncSarbecovirus_MAP
+  - AncAsia_MAP
+  - AncSARS2a_MAP
+  - GD-Pangolin
+  - AncSARS2c_MAP
+  - AncSARS1a_MAP
+  - Rs7327
+  - AncSARS1c_MAP
+  - AncSARS-CoV-1_MAP
+  - AncClade2_MAP
+  - AncClade2_alt1_subs-only
+  - AncClade2_alt2_del1-only
+  - AncClade2_alt3_del2-only
+  - AncClade2_alt4_dels-only
+  
+ancestors_MAP_v_alt:
+  - AncSarbecovirus_MAP
+  - AncSarbecovirus_alt
+  - AncSarbecovirus_alt1_ins117ins118
+  - AncSarbecovirus_tree1
+  - AncEurAf_alt
+  - AncEurAf_tree1
+  - AncAsia_MAP
+  - AncAsia_alt
+  - AncAsia_tree1
+  - AncAsia_tree2
+  - AncSARS2a_MAP
+  - AncSARS2a_alt
+  - AncSARS1a_MAP
+  - AncSARS1a_alt
+  - AncSARS1a_tree1
+  - AncSARS1a_tree2
+  - AncSARS-CoV-1_MAP
+  - AncSARS-CoV-1_alt
+  - AncClade2_MAP
+  - AncClade2_alt
+  - AncClade2_tree2
+  - AncClade2_alt1_subs-only
+  - AncClade2_alt2_del1-only
+  - AncClade2_alt3_del2-only
+  - AncClade2_alt4_dels-only
+
+#indexing of mutated sites for mutated targets
+mutant_indexing_file: data/mutated_target_indexing.csv  
+
+#annotations about RBD sites
+RBD_annotation_file: data/RBD_sites.csv
+RBD_sites: data/RBD_sites.csv
+ 
+# output directories / files
+summary_dir: results/summary
+figs_dir: results/figures
+
+#downloads of prior data
+WH1_bc_variant_lookup: results/prior_DMS_data/WH1_bc_variant_lookup.csv
+WH1_mut_antibody_escape: results/prior_DMS_data/WH1_mutant_antibody-escape.csv
+SARSr_lib46_mut_bind_expr: results/prior_DMS_data/SARSr-lib46_mutant_ACE2binding_expression.csv
+SARSr_lib47_mut_bind_expr: results/prior_DMS_data/SARSr-lib47_wts_ACE2binding_expression.csv
+
+ccs_dir: results/ccs
+process_ccs_dir: results/process_ccs
+processed_ccs_file: results/process_ccs/processed_ccs.csv
+variants_dir: results/variants
+nt_variant_table_file: results/variants/nucleotide_variant_table.csv
+nt_variant_table_file_RshSTT182: results/variants/nucleotide_variant_table_RshSTT182.csv
+codon_variant_table_file_RshSTT182: results/variants/codon_variant_table_RshSTT182.csv
+nt_variant_table_file_PRD-0038: results/variants/nucleotide_variant_table_PRD0038.csv
+codon_variant_table_file_PRD-0038: results/variants/codon_variant_table_PRD0038.csv
+nt_variant_table_file_SARS-CoV-1_2693: results/variants/nucleotide_variant_table_SARS1.csv
+codon_variant_table_file_SARS-CoV-1_2693: results/variants/codon_variant_table_SARS1.csv
+nt_variant_table_file_RsYN04: results/variants/nucleotide_variant_table_RsYN04.csv
+codon_variant_table_file_RsYN04: results/variants/codon_variant_table_RsYN04.csv
+nt_variant_table_file_RmYN02: results/variants/nucleotide_variant_table_RmYN02.csv
+codon_variant_table_file_RmYN02: results/variants/codon_variant_table_RmYN02.csv
+codon_variant_table_file_lib46: results/variants/codon_variant_table_lib46.csv
+
+
+counts_dir: results/counts
+variant_counts_file: results/counts/variant_counts.csv
+
+expression_sortseq_dir: results/expression_meanF
+expression_sortseq_file: results/expression_meanF/bc_expression.csv
+
+Titeseq_Kds_dir: results/binding_Kd
+Titeseq_Kds_file_huACE2: results/binding_Kd/bc_binding_huACE2.csv
+Titeseq_Kds_file_RshACE2: results/binding_Kd/bc_binding_RshACE2.csv
+Titeseq_Kds_file_Ra787ACE2: results/binding_Kd/bc_binding_Ra787ACE2.csv
+Titeseq_Kds_file_Ra9479ACE2: results/binding_Kd/bc_binding_Ra9479ACE2.csv
+Titeseq_Kds_file_RlanACE2: results/binding_Kd/bc_binding_RlanACE2.csv
+Titeseq_Kds_file_RalcACE2: results/binding_Kd/bc_binding_RalcACE2.csv
+Titeseq_Kds_file_RpearACE2: results/binding_Kd/bc_binding_RpearACE2.csv
+
+final_variant_scores_dir: results/final_variant_scores/
+final_variant_scores_lib40_41_file: results/final_variant_scores/final_variant_scores_lib40_41.csv
+final_variant_scores_lib46_muts_file: results/final_variant_scores/final_variant_scores_lib46_muts.csv
+final_variant_scores_lib46_wts_file: results/final_variant_scores/final_variant_scores_lib46_wts.csv
+
+epistatic_shifts_dir: results/epistatic_shifts
+JSD_huACE2_file: results/epistatic_shifts/JSD_huACE2_by_target.csv
+JSD_Ra787ACE2_file: results/epistatic_shifts/JSD_Ra787ACE2_by_target.csv
+JSD_Ra9479ACE2_file: results/epistatic_shifts/JSD_Ra9479ACE2_by_target.csv
+JSD_RlanACE2_file: results/epistatic_shifts/JSD_RlanACE2_by_target.csv
+JSD_RalcACE2_file: results/epistatic_shifts/JSD_RalcACE2_by_target.csv
+JSD_RshACE2_file: results/epistatic_shifts/JSD_RshACE2_by_target.csv
+JSD_expr_file: results/epistatic_shifts/JSD_expr_by_target.csv
+
+visualization_dir: docs/_includes/
+
+# parameters for running PacBio `ccs` program
+min_ccs_accuracy: 0.999
+min_ccs_passes: 3
+min_ccs_length: 50
+max_ccs_length: 5000
+
+# max error rate in gene / barcode CCSs retained for consensu building
+max_error_rate: 0.0001
+
+# Parameters for processing Illumina barcodes, assuming this structure:
+#  [R2 binds] - [upstream] - [barcode] - [downstream] - [R1 binds]
+#  This orientation is hard-wired in the barcode parser, but here it is opposite
+#  Therefore, supplied the "downstream" sequence as reverse complemented upstream
+# Passed to `dms_variants.illuminabarcodeparser.IlluminaBarcodeParser`:
+illumina_barcode_parser_params:
+  upstream: GGCCGC
+  downstream: ''
+  minq: 20
+  upstream_mismatch: 1
+  downstream_mismatch: 0

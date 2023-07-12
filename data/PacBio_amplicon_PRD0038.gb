@@ -1,0 +1,69 @@
+LOCUS       PRD-0038       1076 bp    DNA        linear       21-SEP-2021
+DEFINITION  PacBio amplicon for deep mutational scanning of PRD0038 RBD
+ACCESSION   None
+SOURCE      Tyler Starr
+  ORGANISM  .
+COMMENT     PacBio amplicon for PRD0038 RBD libraries.
+COMMENT     
+COMMENT     ApEinfo:methylated:1
+FEATURES             Location/Qualifiers
+     termini5        1..33
+                     /locus_tag="termini5"
+                     /label="termini5"
+                     /ApEinfo_label="termini5"
+                     /ApEinfo_fwdcolor="#fefb00"
+                     /ApEinfo_revcolor="green"
+                     /ApEinfo_graphicformat="arrow_data {{0 1 2 0 0 -1} {} 0}
+                     width 5 offset 0"
+     spacer          634..1054
+                     /locus_tag="spacer"
+                     /label="spacer"
+                     /ApEinfo_label="spacer"
+                     /ApEinfo_fwdcolor="#fefb00"
+                     /ApEinfo_revcolor="green"
+                     /ApEinfo_graphicformat="arrow_data {{0 1 2 0 0 -1} {} 0}
+                     width 5 offset 0"
+     barcode         1055..1070
+                     /locus_tag="barcode"
+                     /label="barcode"
+                     /ApEinfo_label="barcode"
+                     /ApEinfo_fwdcolor="#00f900"
+                     /ApEinfo_revcolor="green"
+                     /ApEinfo_graphicformat="arrow_data {{0 1 2 0 0 -1} {} 0}
+                     width 5 offset 0"
+     termini3        1071..1076
+                     /locus_tag="termini3"
+                     /label="termini3"
+                     /ApEinfo_label="termini3"
+                     /ApEinfo_fwdcolor="#fefb00"
+                     /ApEinfo_revcolor="green"
+                     /ApEinfo_graphicformat="arrow_data {{0 1 2 0 0 -1} {} 0}
+                     width 5 offset 0"
+     gene            34..633
+                     /locus_tag="gene"
+                     /label="gene"
+                     /ApEinfo_label="gene"
+                     /ApEinfo_fwdcolor="#ff797d"
+                     /ApEinfo_revcolor="#ff102f"
+                     /ApEinfo_graphicformat="arrow_data {{0 0.5 0 1 2 0 0 -1 0
+                     -0.5} {} 0} width 5 offset 0"
+ORIGIN
+        1 ggccgcggag gcggagggtc ggctagccat atgAATATCA CCAATCTTTG TCCCTTCGGT
+       61 CAAGTGTTTA ACGCATCTAA GTTCCCCAGT GTGTATGCTT GGGAAAGGTT ACGTATTAGC
+      121 GATTGCGTGG CCGATTATTC CGTCCTGTAT AATAGCAGTT CATCCTTCTC AACCTTTAAG
+      181 TGTTACGGCG TTTCTCCAAC TAAGTTAAAC GATTTATGTT TCAGTTCCGT TTACGCTGAC
+      241 TACTTTGTGG TCAAAGGGGA CGACGTAAGG CAAATAGCCC CTGCCCAGAC TGGGGTAATA
+      301 GCTGATTATA ACTACAAGCT TCCCGACGAT TTCACCGGAT GTGTCTTGGC TTGGAACACT
+      361 AACTCAGTGG ACAGTAAGCA GGGGAATAAT TTTTATTATC GTCTTTTTCG TCACGGCAAG
+      421 ATTAAGCCTT ACGAAAGGGA TATTAGCAAC GTCCTTTATA ATAGCGCGGG TGGCACTTGC
+      481 TCTAGTACAT CACAGCTAGG ATGCTACGAG CCATTGAAGT CTTACGGGTT CACACCCACT
+      541 GTAGGCGTGG GCTACCAGCC GTACCGTGTG GTCGTCCTTA GCTTTGAGTT ATTGAACGCC
+      601 CCAGCCACCG TTTGTGGACC AAAAAAGTCT ACGctcgagg ggggcggttc cgaacaaaag
+      661 cttatttctg aagaggactt gtaatagaga tctgataaca acagtgtaga tgtaacaaaa
+      721 tcgactttgt tcccactgta cttttagctc gtacaaaata caatatactt ttcatttctc
+      781 cgtaaacaac atgttttccc atgtaatatc cttttctatt tttcgttccg ttaccaactt
+      841 tacacatact ttatatagct attcacttct atacactaaa aaactaagac aattttaatt
+      901 ttgctgcctg ccatatttca atttgttata aattcctata atttatccta ttagtagcta
+      961 aaaaaagatg aatgtgaatc gaatcctaag agaattaatg atacggcgac caccgagatc
+     1021 tacactcttt ccctacacga cgctcttccg atctNNNNNN NNNNNNNNNN gcggcc
+//
