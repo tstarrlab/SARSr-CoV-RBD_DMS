@@ -22,4 +22,4 @@ We have made two tools to help visualize the data from our deep mutational scans
 
 ### Data
 
-If you are interested in the raw data from our study, you can find the ACE2-binding phenotypes from each experiment [here](https://github.com/jbloomlab/SARSr-CoV-RBD_DMS_/tree/main/results/final_variant_scores).
+If you are interested in the raw data from our study, you can find the ACE2-binding phenotypes from each experiment [here](https://github.com/tstarrlab/SARSr-CoV-RBD_DMS/tree/main/results/final_variant_scores).

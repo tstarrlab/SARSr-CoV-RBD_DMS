@@ -24,4 +24,4 @@ The impact on ACE2 receptor-binding of every single amino-acid mutation in six s
 
 ### Data
 
-Raw data  can be found [here](https://github.com/jbloomlab/SARSr-CoV-RBD_DMS_/blob/main/results/final_variant_scores/final_variant_scores_lib40_41.csv). The code used to make these plots can be found [here](https://github.com/jbloomlab/SARSr-CoV-RBD_DMS_/blob/main/RBD-Heatmaps-Interactive-Visualization_delta.ipynb).
+Raw data  can be found [here](https://github.com/tstarrlab/SARSr-CoV-RBD_DMS/blob/main/results/final_variant_scores/final_variant_scores_lib40_41.csv). The code used to make these plots can be found [here](https://github.com/tstarrlab/SARSr-CoV-RBD_DMS/blob/main/RBD-Heatmaps-Interactive-Visualization_delta.ipynb).
