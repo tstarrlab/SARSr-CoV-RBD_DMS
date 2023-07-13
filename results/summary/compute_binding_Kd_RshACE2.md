@@ -463,7 +463,7 @@ invisible(dev.print(pdf, paste(config$Titeseq_Kds_dir,"/hist_Kd-per-barcode_lib4
 ```
 
 Remove stops; make curve examples spanning the titraiton range; look at
-curves at different average count depths and \# missing values. nMSRs.
+curves at different average count depths and # missing values. nMSRs.
 Then cutoff by nMSR, output final values
 
 Some stop variants eked through our RBD+ selection, either perhaps

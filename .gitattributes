@@ -19,3 +19,4 @@ results/variants/codon_variant_table_SARS1.csv filter=lfs diff=lfs merge=lfs -te
 results/variants/codon_variant_table_PRD0038.csv filter=lfs diff=lfs merge=lfs -text
 results/binding_Kd/bc_binding_huACE2.csv filter=lfs diff=lfs merge=lfs -text
 results/binding_Kd/bc_binding_RshACE2.csv filter=lfs diff=lfs merge=lfs -text
+results/counts/variant_counts.csv.gz filter=lfs diff=lfs merge=lfs -text

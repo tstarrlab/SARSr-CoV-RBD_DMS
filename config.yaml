@@ -324,7 +324,7 @@ codon_variant_table_file_lib46: results/variants/codon_variant_table_lib46.csv
 
 
 counts_dir: results/counts
-variant_counts_file: results/counts/variant_counts.csv
+variant_counts_file: results/counts/variant_counts.csv.gz
 
 expression_sortseq_dir: results/expression_meanF
 expression_sortseq_file: results/expression_meanF/bc_expression.csv

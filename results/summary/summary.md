@@ -20,7 +20,7 @@ workflow:
 3. Build barcode-variant lookup tables for the [RshSTT182](build_variants_RshSTT182.md), [PRD-0038](build_variants_PRD0038.md), [SARS-CoV-1 Urbani](build_variants_SARS1.md), [RsYN04](build_variants_RsYN04.md), and [RmYN02](build_variants_RmYN02.md) backgrounds, as well as the [lib46 pan-sarbecoviruses pool](build_variants_lib46.md). Barcode-variant lookup tables are saved for each background: [RshSTT182](../variants/codon_variant_table_RshSTT182.csv), [PRD-0038](../variants/codon_variant_table_PRD0038.csv), [SARS-CoV-1](../variants/codon_variant_table_SARS1.csv), [RsYN04](../variants/codon_variant_table_RsYN04.csv), and [RmYN02](../variants/codon_variant_table_RmYN02.csv), as well as the [lib46 pan-sarbecovirus pool](../variants/codon_variant_table_lib46.csv).
 
 4. [Count variants by barcode](count_variants.md).
-   Creates a [variant counts file](../counts/variant_counts.csv)
+   Creates a [variant counts file](../counts/variant_counts.csv.gz)
    giving counts of each barcoded variant in each condition.
 
 5. Fit titration curves for binding to 
